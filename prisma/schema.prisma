@@ -58,6 +58,7 @@ model User {
     emailVerified DateTime?
     image         String?
     exchangeApiKey String?   @unique
+    exchangeApiSecret String?   @unique
     exchangeName Exchange?
     accounts      Account[]
     sessions      Session[]
