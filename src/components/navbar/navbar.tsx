@@ -6,10 +6,10 @@ import UserMenu from "./userMenu";
 export default function NavbarComponent() {
 
   return (
-    <Navbar maxWidth="full" >
+    <Navbar maxWidth="full" className="dark">
       <NavbarBrand>
         <Image src={icon} alt="Logo" width={50} />
-        <p className="font-bold text-inherit text-xl">CMT</p>
+        <p className="font-bold text-inherit text-xl dark:text-white">CMT</p>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem isActive >

@@ -19,11 +19,6 @@ datasource db {
     
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -62,6 +57,7 @@ model User {
     exchangeName Exchange?
     accounts      Account[]
     sessions      Session[]
+    coins        UserCoin[] 
     @@index([exchangeName])
 }
 
@@ -71,4 +67,23 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model UserCoin {
+    name String @id
+    userId String
+    investedCash Float
+    investedQuantity Float
+    soldCash Float
+    soldQuantity Float
+    currentQuantity Float
+    currentCash Float
+    profitLoss Float
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    @@unique([name, userId])
+}
+
+model TradeConfig{
+    name String @id
+    isTradingActive Boolean @default(false)
 }

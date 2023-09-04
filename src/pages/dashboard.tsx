@@ -1,6 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import AccountOverview from '~/components/dashboard/accountOverview';
 import Onboarding from '~/components/dashboard/onboarding';
 import NavbarComponent from '~/components/navbar/navbar';
 import { api } from '~/utils/api';
@@ -23,10 +24,15 @@ export default function Dashboard() {
     }
   return (
     <main className=" flex min-h-screen flex-col  bg-black">
+      <NavbarComponent/>    
       {!data?.exchangeName && !isLoading && (
         <Onboarding refetch={refetchData} />
       )}
-      <NavbarComponent/>    
+      {data?.exchangeName && (
+        <div className='flex items-center justify-center pt-2 '>
+          <AccountOverview/>
+        </div>
+      )}
     </main>
     
   )
