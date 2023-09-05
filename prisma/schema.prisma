@@ -58,7 +58,22 @@ model User {
     accounts      Account[]
     sessions      Session[]
     coins        UserCoin[] 
+    stats UserStats[]
     @@index([exchangeName])
+}
+
+model UserStats {
+    id String @id @default(cuid())
+    userId String
+    totalInvestedCash Float @default(0) 
+    totalInvestedQuantity Float @default(0)
+    totalSoldCash Float @default(0)
+    totalSoldQuantity Float @default(0)
+    totalProfitLoss Float @default(0)
+    totalEarnings Float @default(0)
+    totalEarningsCashedOut Float @default(0)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
 }
 
 model VerificationToken {
@@ -76,8 +91,6 @@ model UserCoin {
     investedQuantity Float
     soldCash Float
     soldQuantity Float
-    currentQuantity Float
-    currentCash Float
     profitLoss Float
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
     @@unique([name, userId])

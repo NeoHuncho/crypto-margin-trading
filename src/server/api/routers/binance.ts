@@ -1,11 +1,22 @@
 import { Spot } from '@binance/connector';
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import { decryptString } from '../utils/encryptDecryptString';
 
 
+function calculateRemainingFunds(assetValue:number, liabilityValue:number) {
+    const marginLevel = liabilityValue? assetValue / liabilityValue:999;
 
+    if (marginLevel <= 1.5) {
+      return 0; // Already above or equal to 1.5, no funds needed
+    } else {
+      const targetMarginLevel = 1.5;
+      const remainingFunds = (assetValue * targetMarginLevel) - liabilityValue;
+      return remainingFunds
+    }
+  }
+  
 
 export const binanceRouter = createTRPCRouter({
     getBinanceAccountInformation: protectedProcedure
@@ -31,10 +42,22 @@ export const binanceRouter = createTRPCRouter({
             }
             const client = new Spot(user.exchangeApiKey, decryptString(user.exchangeApiSecret));
             const {data}= await client.marginAccount();      
-            return data;
+            return {
+                amountLeftToTradeBtc: calculateRemainingFunds(Number(data.totalNetAssetOfBtc), Number(data.totalLiabilityOfBtc)),
+                ...data,
+            }
             
         }
         ),
+    getCurrentBTCPrice: publicProcedure
+        .query(async () => {
+            const client = new Spot();
+            const {data}= await client.avgPrice('BTCUSDT');
+    
+            return data;
+        }
+        ),
+
     
     
 });

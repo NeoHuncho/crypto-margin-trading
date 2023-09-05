@@ -48,4 +48,28 @@ export const userRouter = createTRPCRouter({
       return user;
     }
     ),
+    getUserStats: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const stats= await ctx.prisma.userStats.findFirst({
+        where: { userId: input.userId },
+      })
+      if (!stats) {
+        throw new Error('User stats not found');
+      }
+      return stats;
+    }),
+    createUserStats: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const stats = await ctx.prisma.userStats.create({
+        data:{
+          userId: input.userId,
+        }
+      })
+      if (!stats) {
+        throw new Error('User stats not found');
+      }
+      return stats;
+    }),
 });

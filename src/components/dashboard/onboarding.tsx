@@ -9,6 +9,7 @@ export default function Onboarding({refetch}:{refetch: () => void }) {
   const [exchangeApiKey, setExchangeApiKey]= useState("");
   const [exchangeApiSecret, setExchangeApiSecret]= useState("");
   const updateUserExchangeData= api.user.updateUserExchangeData.useMutation();
+  const createUserStats=  api.user.createUserStats.useMutation();
   const userId=sessionData?.user.id;
   
   const confirmOnboarding=async()=>{
@@ -19,6 +20,9 @@ export default function Onboarding({refetch}:{refetch: () => void }) {
       exchangeName,
       exchangeApiKey,
       exchangeApiSecret
+    })
+    await createUserStats.mutateAsync({
+      userId,
     })
     refetch();
   }

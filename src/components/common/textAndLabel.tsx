@@ -1,5 +1,5 @@
 
-export default function TextAndLabel({text,label}:{text:string,label:string}) {
+export default function TextAndLabel({text,label,symbol=''}:{text:string|number,label:string,symbol?:string}) {
       if( !isNaN(Number(text)))
       text=Number(text).toFixed(2);
     
@@ -14,7 +14,7 @@ export default function TextAndLabel({text,label}:{text:string,label:string}) {
           })    
         }
       </div>
-        <p className="text-center font-semibold dark:text-gray-100 text-lg">{text}</p>
+        <p className="text-center font-semibold dark:text-gray-100 text-lg">{`${text}${symbol}`}</p>
     </div>
   )
 }
