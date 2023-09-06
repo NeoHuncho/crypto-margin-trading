@@ -2,6 +2,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import AccountOverview from '~/components/dashboard/accountOverview';
+import CoinsOverview from '~/components/dashboard/coinsOverview';
 import Onboarding from '~/components/dashboard/onboarding';
 import NavbarComponent from '~/components/navbar/navbar';
 import { api } from '~/utils/api';
@@ -29,8 +30,9 @@ export default function Dashboard() {
         <Onboarding refetch={refetchData} />
       )}
       {data?.exchangeName && (
-        <div className='flex items-center justify-center pt-2 '>
+        <div className='flex flex-col items-center justify-center pt-2 gap-20 '>
           <AccountOverview/>
+          <CoinsOverview/>
         </div>
       )}
     </main>

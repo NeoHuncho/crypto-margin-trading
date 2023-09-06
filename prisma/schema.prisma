@@ -57,7 +57,8 @@ model User {
     exchangeName Exchange?
     accounts      Account[]
     sessions      Session[]
-    coins        UserCoin[] 
+    coins        UserCoin[]
+    archivedCoins ArchivedUserCoin[] 
     stats UserStats[]
     @@index([exchangeName])
 }
@@ -87,11 +88,23 @@ model VerificationToken {
 model UserCoin {
     name String @id
     userId String
-    investedCash Float
-    investedQuantity Float
-    soldCash Float
-    soldQuantity Float
-    profitLoss Float
+    investedCash Float @default(0)
+    investedQuantity Float @default(0)
+    soldCash Float @default(0)
+    soldQuantity Float @default(0)
+    profitLoss Float @default(0)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    @@unique([name, userId])
+}
+
+model ArchivedUserCoin {
+    name String @id
+    userId String
+    investedCash Float @default(0)
+    investedQuantity Float @default(0)
+    soldCash Float @default(0)
+    soldQuantity Float @default(0)
+    profitLoss Float @default(0)
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
     @@unique([name, userId])
 }
