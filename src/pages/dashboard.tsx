@@ -34,7 +34,7 @@ export default function Dashboard() {
         <Onboarding refetch={refetchData} />
       )}
       {data?.exchangeName && (
-        <div className="flex flex-col items-center justify-center gap-5 pt-2 ">
+        <div className="flex flex-col items-center justify-center gap-8 pt-2 ">
           <AccountOverview />
           <AccountActions />
           <CoinsOverview />
