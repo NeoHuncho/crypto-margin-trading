@@ -8,12 +8,24 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { api } from "~/utils/api";
 
 export default function AccountActions() {
+  const { data: sessionData } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [buyPercentage, setBuyPercentage] = useState("30");
+  const buySellMarginCoinsPercentage =
+    api.binance.buySellMarginCoinsPercentage.useMutation();
 
+  const orderCoins = async () => {
+    await buySellMarginCoinsPercentage.mutateAsync({
+      userId: sessionData?.user.id ?? "",
+      percentage: Number(buyPercentage) / 100,
+      allUserCoins: true,
+    });
+  };
   return (
     <>
       <Button onPress={onOpen}>Account actions</Button>
@@ -36,7 +48,11 @@ export default function AccountActions() {
               <p>% of available balance for all coins</p>
             </div>
             <div className="mx-6 flex">
-              <Button fullWidth color="success">
+              <Button
+                onClick={() => void orderCoins()}
+                fullWidth
+                color="success"
+              >
                 Buy
               </Button>
             </div>

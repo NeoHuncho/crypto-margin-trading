@@ -423,7 +423,7 @@ declare module "@binance/connector" {
       options: MarginOrderParameters,
     ): Promise<AxiosResponse<MarginOrderResponse>>;
     marginMaxBorrowable(
-      options: AssetQueryParameters,
+      symbol: string,
     ): Promise<AxiosResponse<{ amount: string; borrowLimit: string }>>;
   }
 }
