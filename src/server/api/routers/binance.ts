@@ -1,4 +1,4 @@
-import { Spot } from "@binance/connector";
+import { Spot, type LotSizeFilter } from "@binance/connector";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -88,25 +88,26 @@ export const binanceRouter = createTRPCRouter({
       if (!input.coins && !input.allUserCoins) {
         throw new Error("Either coins or allUserCoins must be set");
       }
-      if (input.coins) {
-        const coins = input.coins;
+      //! update to method in allUserCoins
+      // if (input.coins) {
+      //   const coins = input.coins;
 
-        quantitiesToTrade = (
-          await Promise.all(
-            coins.map(async (coin) => {
-              const {
-                data: { amount },
-              } = await client.marginMaxBorrowable(coin);
-              return [
-                coin,
-                (parseFloat(amount) * input.percentage) / coins.length,
-              ];
-            }),
-          )
-        ).reduce((acc, curr) => {
-          return { ...acc, [curr[0] as string]: curr[1] };
-        }, {});
-      }
+      //   quantitiesToTrade = (
+      //     await Promise.all(
+      //       coins.map(async (coin) => {
+      //         const {
+      //           data: { amount },
+      //         } = await client.marginMaxBorrowable(coin);
+      //         return [
+      //           coin,
+      //           (parseFloat(amount) * input.percentage) / coins.length,
+      //         ];
+      //       }),
+      //     )
+      //   ).reduce((acc, curr) => {
+      //     return { ...acc, [curr[0] as string]: curr[1] };
+      //   }, {});
+      // }
       if (input.allUserCoins) {
         const userCoins = await ctx.prisma.userCoin.findMany({
           where: {
@@ -117,6 +118,10 @@ export const binanceRouter = createTRPCRouter({
           },
         });
 
+        const { data } = await client.exchangeInfo({
+          symbols: userCoins.map((coin) => `${coin.name}USDT`),
+        });
+
         quantitiesToTrade = (
           await Promise.all(
             userCoins.map(async (coin) => {
@@ -124,9 +129,23 @@ export const binanceRouter = createTRPCRouter({
                 const {
                   data: { amount },
                 } = await client.marginMaxBorrowable(coin.name);
+                const amountToTrade =
+                  (parseFloat(amount) * input.percentage) / userCoins.length;
+                const coinData = data.symbols.find(
+                  (d) => d.symbol === `${coin.name}USDT`,
+                );
+                if (coinData === undefined)
+                  throw new Error(`coinData is null for coin ${coin.name}`);
+
+                const LotSizeFilter = coinData.filters.find(
+                  (f) => f.filterType === "LOT_SIZE",
+                ) as LotSizeFilter;
+
                 return [
                   coin.name,
-                  (parseFloat(amount) * input.percentage) / userCoins.length,
+                  Math.floor(
+                    amountToTrade / parseFloat(LotSizeFilter.stepSize),
+                  ) * parseFloat(LotSizeFilter.stepSize),
                 ];
               } catch (error) {
                 return [coin.name, 0];
@@ -140,6 +159,17 @@ export const binanceRouter = createTRPCRouter({
       if (!quantitiesToTrade) {
         throw new Error("quantitiesToTrade is null");
       }
+
+      for (const [coin, quantity] of Object.entries(quantitiesToTrade)) {
+        if (quantity > 0) {
+          await client.marginBorrow(coin, quantity);
+          console.log(`selling ${quantity} of ${coin}`);
+          await client.newMarginOrder(`${coin}USDT`, "SELL", "MARKET", {
+            quantity: quantity.toString(),
+          });
+        }
+      }
+
       return quantitiesToTrade;
     }),
 });
