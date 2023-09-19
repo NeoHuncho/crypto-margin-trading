@@ -9,7 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 
 export default function UserMenu() {
   const { data } = useSession();
-  console.log(data);
+
   return (
     <Dropdown>
       <DropdownTrigger>

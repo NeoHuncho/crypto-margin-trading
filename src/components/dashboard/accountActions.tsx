@@ -16,15 +16,18 @@ export default function AccountActions() {
   const { data: sessionData } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [buyPercentage, setBuyPercentage] = useState("30");
+  const [isLoadingOrderCoins, setIsLoadingOrderCoins] = useState(false);
   const buySellMarginCoinsPercentage =
     api.binance.buySellMarginCoinsPercentage.useMutation();
 
   const orderCoins = async () => {
+    setIsLoadingOrderCoins(true);
     await buySellMarginCoinsPercentage.mutateAsync({
       userId: sessionData?.user.id ?? "",
       percentage: Number(buyPercentage) / 100,
       allUserCoins: true,
     });
+    setIsLoadingOrderCoins(false);
   };
   return (
     <>
@@ -52,6 +55,7 @@ export default function AccountActions() {
                 onClick={() => void orderCoins()}
                 fullWidth
                 color="success"
+                isLoading={isLoadingOrderCoins}
               >
                 Buy
               </Button>

@@ -4,9 +4,11 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import { decryptString } from "../utils/encryptDecryptString";
 
-function calculateRemainingFunds(assetValue: number, liabilityValue: number) {
-  const marginLevel = liabilityValue ? assetValue / liabilityValue : 999;
-
+function calculateRemainingFunds(
+  assetValue: number,
+  liabilityValue: number,
+  marginLevel: number,
+) {
   if (marginLevel <= 1.5) {
     return 0;
   } else {
@@ -47,6 +49,7 @@ export const binanceRouter = createTRPCRouter({
         amountLeftToTradeBtc: calculateRemainingFunds(
           Number(data.totalNetAssetOfBtc),
           Number(data.totalLiabilityOfBtc),
+          Number(data.marginLevel),
         ),
         ...data,
       };
@@ -75,6 +78,7 @@ export const binanceRouter = createTRPCRouter({
           exchangeApiSecret: true,
         },
       });
+
       if (!user?.exchangeApiKey || !user.exchangeApiSecret) {
         throw new Error("User not found");
       }
@@ -163,9 +167,35 @@ export const binanceRouter = createTRPCRouter({
       for (const [coin, quantity] of Object.entries(quantitiesToTrade)) {
         if (quantity > 0) {
           await client.marginBorrow(coin, quantity);
-          console.log(`selling ${quantity} of ${coin}`);
-          await client.newMarginOrder(`${coin}USDT`, "SELL", "MARKET", {
-            quantity: quantity.toString(),
+          const { data } = await client.newMarginOrder(
+            `${coin}USDT`,
+            "SELL",
+            "MARKET",
+            {
+              quantity: quantity.toString(),
+            },
+          );
+
+          const userCoin = await ctx.prisma.userCoin.findUnique({
+            where: {
+              userId: input.userId,
+              name: coin,
+            },
+          });
+          if (userCoin === null) {
+            return;
+          }
+
+          await ctx.prisma.userCoin.update({
+            where: {
+              userId: input.userId,
+              name: coin,
+            },
+            data: {
+              investedCash:
+                userCoin.investedCash + Number(data.cummulativeQuoteQty),
+              investedQuantity: quantity,
+            },
           });
         }
       }
