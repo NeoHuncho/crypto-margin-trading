@@ -152,6 +152,8 @@ export const binanceRouter = createTRPCRouter({
                   ) * parseFloat(LotSizeFilter.stepSize),
                 ];
               } catch (error) {
+                console.log("quantities to trade error:");
+                console.log(error);
                 return [coin.name, 0];
               }
             }),
@@ -200,6 +202,7 @@ export const binanceRouter = createTRPCRouter({
             });
           }
         } catch (error) {
+          console.log("biannce actions error:");
           console.log(error);
         }
       }
