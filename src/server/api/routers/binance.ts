@@ -165,38 +165,42 @@ export const binanceRouter = createTRPCRouter({
       }
 
       for (const [coin, quantity] of Object.entries(quantitiesToTrade)) {
-        if (quantity > 0) {
-          await client.marginBorrow(coin, quantity);
-          const { data } = await client.newMarginOrder(
-            `${coin}USDT`,
-            "SELL",
-            "MARKET",
-            {
-              quantity: quantity.toString(),
-            },
-          );
+        try {
+          if (quantity > 0) {
+            await client.marginBorrow(coin, quantity);
+            const { data } = await client.newMarginOrder(
+              `${coin}USDT`,
+              "SELL",
+              "MARKET",
+              {
+                quantity: quantity.toString(),
+              },
+            );
 
-          const userCoin = await ctx.prisma.userCoin.findUnique({
-            where: {
-              userId: input.userId,
-              name: coin,
-            },
-          });
-          if (userCoin === null) {
-            return;
+            const userCoin = await ctx.prisma.userCoin.findUnique({
+              where: {
+                userId: input.userId,
+                name: coin,
+              },
+            });
+            if (userCoin === null) {
+              return;
+            }
+
+            await ctx.prisma.userCoin.update({
+              where: {
+                userId: input.userId,
+                name: coin,
+              },
+              data: {
+                investedCash:
+                  userCoin.investedCash + Number(data.cummulativeQuoteQty),
+                investedQuantity: quantity,
+              },
+            });
           }
-
-          await ctx.prisma.userCoin.update({
-            where: {
-              userId: input.userId,
-              name: coin,
-            },
-            data: {
-              investedCash:
-                userCoin.investedCash + Number(data.cummulativeQuoteQty),
-              investedQuantity: quantity,
-            },
-          });
+        } catch (error) {
+          console.log(error);
         }
       }
 

@@ -16,17 +16,26 @@ export default function AccountActions() {
   const { data: sessionData } = useSession();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [buyPercentage, setBuyPercentage] = useState("30");
+  const [hasErrored, setHasErrored] = useState(false);
   const [isLoadingOrderCoins, setIsLoadingOrderCoins] = useState(false);
   const buySellMarginCoinsPercentage =
-    api.binance.buySellMarginCoinsPercentage.useMutation();
+    api.binance.buySellMarginCoinsPercentage.useMutation({
+      onError: (error) => {
+        console.error(error);
+        setHasErrored(true);
+        setIsLoadingOrderCoins(false);
+      },
+    });
 
   const orderCoins = async () => {
     setIsLoadingOrderCoins(true);
+    setHasErrored(false);
     await buySellMarginCoinsPercentage.mutateAsync({
       userId: sessionData?.user.id ?? "",
       percentage: Number(buyPercentage) / 100,
       allUserCoins: true,
     });
+
     setIsLoadingOrderCoins(false);
   };
   return (
@@ -60,6 +69,10 @@ export default function AccountActions() {
                 Buy
               </Button>
             </div>
+            {hasErrored && (
+              <p className="text-center text-red-500">An error has occurred</p>
+            )}
+
             <Divider className="my-2" />
           </ModalBody>
         </ModalContent>
