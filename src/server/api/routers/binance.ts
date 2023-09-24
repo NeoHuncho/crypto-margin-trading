@@ -2,6 +2,7 @@ import { Spot, type LotSizeFilter } from "@binance/connector";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
+import { captureException } from "@sentry/nextjs";
 import { decryptString } from "../utils/encryptDecryptString";
 
 function calculateRemainingFunds(
@@ -152,9 +153,11 @@ export const binanceRouter = createTRPCRouter({
                   ) * parseFloat(LotSizeFilter.stepSize),
                 ];
               } catch (error) {
-                console.log("quantities to trade error:");
-                console.log(error);
-                return [coin.name, 0];
+                captureException(error, {
+                  extra: {
+                    message: "Binance actions error",
+                  },
+                });
               }
             }),
           )
@@ -202,8 +205,11 @@ export const binanceRouter = createTRPCRouter({
             });
           }
         } catch (error) {
-          console.log("biannce actions error:");
-          console.log(error);
+          captureException(error, {
+            extra: {
+              message: "Binance actions error",
+            },
+          });
         }
       }
 
