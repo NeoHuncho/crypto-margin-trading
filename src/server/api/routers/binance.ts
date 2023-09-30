@@ -158,6 +158,7 @@ export const binanceRouter = createTRPCRouter({
                     message: "Binance actions error",
                   },
                 });
+                return [coin.name, 0];
               }
             }),
           )
