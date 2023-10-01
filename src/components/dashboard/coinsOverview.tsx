@@ -1,4 +1,4 @@
-import { Card, CardBody, Input } from "@nextui-org/react";
+import { Card, Input } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Icon } from "~/assets/icons";
@@ -30,54 +30,56 @@ function AddNewCoinCard({ refetchCoins }: { refetchCoins: () => void }) {
     refetchCoins();
   };
 
+  const setCoinNameInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCoinName(event.target.value);
+  };
+
   if (!binanceAccountData) return null;
   return (
     <Card className="cursor-pointer">
-      <CardBody>
-        <div
-          onClick={() => setIsAdding(true)}
-          className="flex flex-col"
-          style={{ minHeight: 100 }}
-        >
-          {!isAdding ? (
-            <div className="flex h-full flex-col items-center justify-center gap-2">
-              <Icon
-                name="CirclePlus"
-                size={30}
-                className="text-gray-700 dark:text-gray-200"
-              />
-              <p className="text-lg font-semibold">Add New Coin</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <Input
-                placeholder="Coin symbol (ex: BTC)"
-                value={coinName}
-                onValueChange={setCoinName}
-              />
-              <div>
-                <p className="mb-4 text-center text-sm italic">
-                  choose from available coins for margin trading
-                </p>
-                <div className="flex flex-col gap-2">
-                  {coinName &&
-                    findMatchingCoins(coinName)
-                      ?.map((coin) => (
-                        <p
-                          key={coin.asset}
-                          className="text-sm"
-                          onClick={() => void createCoin(coin.asset)}
-                        >
-                          {coin.asset}
-                        </p>
-                      ))
-                      .slice(0, 5)}
-                </div>
+      <div
+        onClick={() => setIsAdding(true)}
+        className="flex flex-col"
+        style={{ minHeight: 100 }}
+      >
+        {!isAdding ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2">
+            <Icon
+              name="CirclePlus"
+              size={30}
+              className="text-gray-700 dark:text-gray-200"
+            />
+            <p className="text-lg font-semibold">Add New Coin</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Input
+              placeholder="Coin symbol (ex: BTC)"
+              value={coinName}
+              onChange={setCoinNameInput}
+            />
+            <div>
+              <p className="mb-4 text-center text-sm italic">
+                choose from available coins for margin trading
+              </p>
+              <div className="flex flex-col gap-2">
+                {coinName &&
+                  findMatchingCoins(coinName)
+                    ?.map((coin) => (
+                      <p
+                        key={coin.asset}
+                        className="text-sm"
+                        onClick={() => void createCoin(coin.asset)}
+                      >
+                        {coin.asset}
+                      </p>
+                    ))
+                    .slice(0, 5)}
               </div>
             </div>
-          )}
-        </div>
-      </CardBody>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }
@@ -103,21 +105,19 @@ export default function CoinsOverview() {
     <div className="grid w-full grid-cols-6 gap-6 px-4 dark">
       {userCoins?.map((coin) => (
         <Card key={coin.name}>
-          <CardBody>
+          <div className="flex flex-col gap-2">
+            <Icon
+              name="Trash"
+              size={15}
+              onClick={() => void deleteCoin(coin.name)}
+              className="absolute right-6 top-4 cursor-pointer text-gray-700 dark:text-gray-200"
+            />
+            <p className="text-center text-lg font-semibold">{coin.name}</p>
             <div className="flex flex-col gap-2">
-              <Icon
-                name="Trash"
-                size={15}
-                onClick={() => void deleteCoin(coin.name)}
-                className="absolute right-6 top-4 cursor-pointer text-gray-700 dark:text-gray-200"
-              />
-              <p className="text-center text-lg font-semibold">{coin.name}</p>
-              <div className="flex flex-col gap-2">
-                {/* <p className="text-sm">Total Trades: {coin.name}</p>
+              {/* <p className="text-sm">Total Trades: {coin.name}</p>
                 <p className="text-sm">Total Profit: {coin.profitLoss}$</p> */}
-              </div>
             </div>
-          </CardBody>
+          </div>
         </Card>
       ))}
       <AddNewCoinCard refetchCoins={refetchCoins} />

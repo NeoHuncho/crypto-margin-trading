@@ -1,3 +1,4 @@
+import { AppShell } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -5,7 +6,7 @@ import AccountActions from "~/components/dashboard/accountActions";
 import AccountOverview from "~/components/dashboard/accountOverview";
 import CoinsOverview from "~/components/dashboard/coinsOverview";
 import Onboarding from "~/components/dashboard/onboarding";
-import NavbarComponent from "~/components/navbar/navbar";
+import Header from "~/components/header/header";
 import { api } from "~/utils/api";
 
 export default function Dashboard() {
@@ -28,18 +29,20 @@ export default function Dashboard() {
     void refetch();
   };
   return (
-    <main className=" flex min-h-screen flex-col  bg-black">
-      <NavbarComponent />
+    <AppShell header={{ height: 60 }} padding="md">
+      <Header />
       {!data?.exchangeName && !isLoading && (
         <Onboarding refetch={refetchData} />
       )}
       {data?.exchangeName && (
-        <div className="flex flex-col items-center justify-center gap-8 pt-2 ">
-          <AccountOverview />
-          <AccountActions />
-          <CoinsOverview />
-        </div>
+        <AppShell.Main>
+          <div className="flex flex-col items-center justify-center gap-8 pt-2 ">
+            <AccountOverview />
+            <AccountActions />
+            <CoinsOverview />
+          </div>
+        </AppShell.Main>
       )}
-    </main>
+    </AppShell>
   );
 }

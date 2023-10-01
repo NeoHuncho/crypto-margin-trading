@@ -1,21 +1,14 @@
-import {
-  Button,
-  Divider,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  useDisclosure,
-} from "@nextui-org/react";
+import { Button, Modal, NumberInput } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { api } from "~/utils/api";
 
 export default function AccountActions() {
   const { data: sessionData } = useSession();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [buyPercentage, setBuyPercentage] = useState("30");
+  const [opened, { open, close }] = useDisclosure(false);
+  const [buyPercentage, setBuyPercentage] = useState<string | number>(30);
   const [hasErrored, setHasErrored] = useState(false);
   const [isLoadingOrderCoins, setIsLoadingOrderCoins] = useState(false);
   const buySellMarginCoinsPercentage =
@@ -40,42 +33,32 @@ export default function AccountActions() {
   };
   return (
     <>
-      <Button onPress={onOpen}>Account actions</Button>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Account actions
-          </ModalHeader>
-          <ModalBody>
-            <div className="flex items-center justify-center">
-              <p>Buy</p>
-              <Input
-                key="sm"
-                value={buyPercentage}
-                onValueChange={setBuyPercentage}
-                type="number"
-                classNames={{ base: "w-16 mx-2" }}
-                max={100}
-              />
-              <p>% of available balance for all coins</p>
-            </div>
-            <div className="mx-6 flex">
-              <Button
-                onClick={() => void orderCoins()}
-                fullWidth
-                color="success"
-                isLoading={isLoadingOrderCoins}
-              >
-                Buy
-              </Button>
-            </div>
-            {hasErrored && (
-              <p className="text-center text-red-500">An error has occurred</p>
-            )}
-
-            <Divider className="my-2" />
-          </ModalBody>
-        </ModalContent>
+      <Button onClick={open}>Account actions</Button>
+      <Modal opened={opened} onClose={close} centered title="Account Actions">
+        <div className="flex items-center justify-center">
+          <p>Buy</p>
+          <NumberInput
+            key="sm"
+            value={buyPercentage}
+            onChange={setBuyPercentage}
+            classNames={{ input: "w-16", wrapper: "mx-2" }}
+            max={100}
+            error={hasErrored ? "An error has occurred" : false}
+          />
+          <p>% of available balance for all coins</p>
+        </div>
+        <div className="mx-6 flex">
+          <Button
+            onClick={() => void orderCoins()}
+            fullWidth
+            loading={isLoadingOrderCoins}
+          >
+            Buy
+          </Button>
+        </div>
+        {hasErrored && (
+          <p className="text-center text-red-500">An error has occurred</p>
+        )}
       </Modal>
     </>
   );
