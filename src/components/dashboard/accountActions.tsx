@@ -1,4 +1,4 @@
-import { Button, Modal, NumberInput } from "@mantine/core";
+import { Button, Divider, Modal, NumberInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 import { useSession } from "next-auth/react";
@@ -35,7 +35,7 @@ export default function AccountActions() {
     <>
       <Button onClick={open}>Account actions</Button>
       <Modal opened={opened} onClose={close} centered title="Account Actions">
-        <div className="flex items-center justify-center">
+        <div className="flex w-full items-center justify-center">
           <p>Buy</p>
           <NumberInput
             key="sm"
@@ -45,20 +45,17 @@ export default function AccountActions() {
             max={100}
             error={hasErrored ? "An error has occurred" : false}
           />
-          <p>% of available balance for all coins</p>
-        </div>
-        <div className="mx-6 flex">
+          <p className="whitespace-nowrap">
+            % of available balance for all coins
+          </p>
+          <Divider className="mx-4" orientation="vertical" />
           <Button
             onClick={() => void orderCoins()}
-            fullWidth
             loading={isLoadingOrderCoins}
           >
             Buy
           </Button>
         </div>
-        {hasErrored && (
-          <p className="text-center text-red-500">An error has occurred</p>
-        )}
       </Modal>
     </>
   );

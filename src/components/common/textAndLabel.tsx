@@ -21,7 +21,7 @@ export default function TextAndLabel({
           );
         })}
       </div>
-      <p className="text-center text-lg font-semibold ">{`${text}${symbol}`}</p>
+      <p className="text-center text-lg font-semibold my-2">{`${text}${symbol}`}</p>
     </div>
   );
 }

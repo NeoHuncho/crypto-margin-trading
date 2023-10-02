@@ -1,4 +1,4 @@
-import { Card } from "@mantine/core";
+import { Card, Divider } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import TextAndLabel from "../common/textAndLabel";
@@ -17,10 +17,9 @@ export default function AccountOverview() {
   const { data: btcPrice } = api.binance.getCurrentBTCPrice.useQuery();
   if (!binanceAccountData || !userData || !btcPrice) return null;
   return (
-    <Card className="w-fit">
-      <h1 className="mb-6 text-center text-xl font-semibold">
-        Account Overview
-      </h1>
+    <Card className="w-fit rounded-lg">
+      <h1 className=" text-center text-xl font-semibold">Account Overview</h1>
+      <Divider className="mb-5"/>
       <div className="grid grid-cols-4 gap-4">
         <TextAndLabel
           symbol="$"
